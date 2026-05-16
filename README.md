@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SURVE / Site Solver Platform
 
-## Getting Started
+SURVE is a web-based generative design and urban planning platform. It allows users to rapidly prototype site layouts, calculate feasibility metrics, and generate formal land survey diagrams.
 
-First, run the development server:
+## 🚀 Quick Start
 
+### 1. Prerequisites
+- **Node.js** (v18 or higher)
+- **npm** or **bun**
+
+### 2. Installation
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Install dependencies
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Setup Environment
+Create a `.env.local` file in the root directory and add your Google Auth credentials:
+```env
+GOOGLE_ID=your_google_client_id
+GOOGLE_SECRET=your_google_client_secret
+NEXTAUTH_SECRET=your_random_secret_string
+NEXTAUTH_URL=http://localhost:3000
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Launch Studio
+```bash
+# Start the development server
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) to begin planning.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🛠 Design Workflow
 
-To learn more about Next.js, take a look at the following resources:
+1. **Locate Site**: Search for your property and lock the site context.
+2. **Define Boundary**: Use the **Boundary Tool** to draw the property extent.
+3. **Infrastructure**:
+   - Draw **Roads** (Highway, Local, etc.) with auto-placed assets.
+   - Define **Parking Areas**.
+   - Adjust **Setback Offsets**.
+4. **Subdivide**: Click **Auto-Subdivide Site** to generate parcels that respect your infrastructure.
+5. **Analyze & Export**:
+   - View **Insights** for yield and efficiency reports.
+   - Generate **Survey Records** (South African SG Diagram standards).
+   - Use **Export Mode** for print-ready studio documents.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📦 Tech Stack
+- **Framework**: Next.js 15 (App Router)
+- **Spatial Analysis**: @turf/turf
+- **Styling**: Tailwind CSS
+- **Auth**: NextAuth.js (Google)
+- **Icons**: Lucide React
