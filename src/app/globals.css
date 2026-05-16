@@ -1,16 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020617;
-  --foreground: #f8fafc;
+  --background: #ffffff;
+  --foreground: #000000;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 canvas {
   touch-action: none;
+}
+
+/* Custom Scrollbar for B&W theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #000;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
 }

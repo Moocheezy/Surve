@@ -2,17 +2,62 @@
 > temp-surve@0.1.0 dev
 > next dev
 
-⚠ Port 3000 is in use by an unknown process, using available port 3001 instead.
 ▲ Next.js 16.2.6 (Turbopack)
-- Local:         http://localhost:3001
-- Network:       http://192.168.0.2:3001
-✓ Ready in 593ms
-⨯ Another next dev server is already running.
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+✓ Ready in 1115ms
 
-- Local:        http://localhost:3000
-- PID:          75359
-- Dir:          /app
-- Log:          .next/dev/logs/next-development.log
+ GET / 200 in 805ms (next.js: 527ms, application-code: 278ms)
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET /api/auth/session 200 in 292ms
+[next-auth][warn][NEXTAUTH_URL]
+https://next-auth.js.org/warnings#nextauth_url
+[next-auth][warn][NO_SECRET]
+https://next-auth.js.org/warnings#no_secret
+ GET / 200 in 69ms (next.js: 7ms, application-code: 62ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
 
-Run kill 75359 to stop it.
-[?25h
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <RedirectBoundary>
+      <RedirectErrorBoundary router={{...}}>
+        <InnerLayoutRouter url="/" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+          <SegmentViewNode type="page" pagePath="src/page.tsx">
+            <SegmentTrieNode>
+            <ClientPageRoot Component={function Home} serverProvidedParams={{...}}>
+              <Home params={Promise} searchParams={Promise}>
+                <main className="flex flex-...">
+                  <header>
+                  <div className="flex-1 fle...">
+                    <div>
+                    <div className="flex-1 rel...">
+                      <MapPortal isLocked={false} onLock={function onLock}>
+                        <div className="relative w...">
+                          <div className="absolute t...">
+                            <div className="bg-white b...">
+                              <Search>
+                              <input
+                                type="text"
+                                placeholder="Search Location..."
+                                className="outline-none bg-transparent text-sm font-bold uppercase p-2 w-64"
+                                value=""
+                                onChange={function onChange}
+-                               style={{caret-color:"transparent"}}
+                              >
+                            ...
+                          ...
+                    ...
+          ...
+        ...
+
+[browser] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET /api/auth/session 200 in 42ms (next.js: 19ms, application-code: 22ms)
