@@ -39,15 +39,27 @@ export default function MapPortal({ onLock, isLocked }: MapPortalProps) {
       </div>
 
       {/* Simulated Map Layer */}
-      <div className={`flex-1 relative transition-opacity duration-500 ${isLocked ? 'opacity-30 grayscale' : 'opacity-100'}`}>
-        <div className="absolute inset-0 bg-[url('https://www.google.com/maps/vt/pb=!1m4!1m3!1i15!2i16384!3i16384!2m3!1e0!2sm!3i345013117!3m8!2sen!3sus!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0!5m1!1e0')] bg-cover bg-center" />
+      <div className={`flex-1 relative transition-opacity duration-500 overflow-hidden ${isLocked ? 'opacity-30 grayscale' : 'opacity-100'}`}>
+        {/* Using a public tile server for actual map context (OpenStreetMap stylized) */}
+        <div
+          className="absolute inset-0 bg-[#e5e5e5] opacity-50 transition-all duration-700"
+          style={{
+            backgroundImage: `url('https://stamen-tiles.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png')`,
+            backgroundSize: '256px',
+            filter: 'contrast(0.8) brightness(1.2)'
+          }}
+        />
+        <div className="absolute inset-0 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.03]" />
 
-        {/* Placeholder for real Google Maps API integration */}
+        {/* Actual Dynamic Context Placeholder */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {!isLocked && (
-            <div className="bg-white/80 border border-black p-4 text-center space-y-2">
-              <MapIcon className="mx-auto" />
-              <p className="text-[10px] font-bold uppercase">Google Maps Layer Active</p>
+            <div className="bg-white border-4 border-black p-6 text-center space-y-4 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
+              <MapIcon size={32} className="mx-auto" />
+              <div className="space-y-1">
+                <p className="text-xs font-black uppercase tracking-widest">Active Site Engine</p>
+                <p className="text-[10px] font-mono opacity-50 uppercase">{address || "Coordinates: 32.7767° N, 96.7970° W"}</p>
+              </div>
             </div>
           )}
         </div>
