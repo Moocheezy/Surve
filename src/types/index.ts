@@ -1,4 +1,24 @@
+import { Point } from '@/components/SiteBoundaryTool';
+
 export type Typology = 'Residential' | 'Industrial' | 'Retail' | 'Mixed-Use';
+
+export type RoadType = 'Highway' | 'Arterial' | 'Local' | 'Specialized';
+
+export interface Road {
+  id: string;
+  type: RoadType;
+  centerline: Point[];
+  width: number;
+  lanes: number;
+  assets: InfrastructureAsset[];
+}
+
+export interface InfrastructureAsset {
+  id: string;
+  type: 'Light' | 'Sign' | 'Tree' | 'Drainage';
+  position: Point;
+  rotation: number;
+}
 
 export interface Site {
   width: number;
@@ -41,6 +61,7 @@ export interface Scheme {
   typology: Typology;
   site: Site;
   blocks: BuildingBlock[];
+  roads: Road[];
   proForma: ProForma;
   suggestions: Suggestion[];
   timestamp: number;

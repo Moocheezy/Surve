@@ -112,6 +112,7 @@ export function solveSite(params: SolverParams): Scheme {
     typology,
     site: { width: siteWidth, length: siteLength, setback },
     blocks,
+    roads: [],
     proForma,
     suggestions,
     timestamp: Date.now(),

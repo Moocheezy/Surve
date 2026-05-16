@@ -4,14 +4,18 @@ import { useState } from 'react';
 import MapPortal from '@/components/MapPortal';
 import SiteBoundaryTool from '@/components/SiteBoundaryTool';
 import InfrastructureTool from '@/components/InfrastructureTool';
+import RoadBuilder from '@/components/RoadBuilder';
 import UserMenu from '@/components/UserMenu';
 import Image from 'next/image';
 
 import { Point } from '@/components/SiteBoundaryTool';
+import { Road, RoadType } from '@/types';
 
 export default function Home() {
   const [isLocked, setIsLocked] = useState(false);
   const [siteBoundary, setSiteBoundary] = useState<Point[]>([]);
+  const [roads, setRoads] = useState<Road[]>([]);
+  const [activeRoadType, setActiveRoadType] = useState<RoadType>('Local');
 
   return (
     <main className="flex flex-col h-screen w-full bg-white text-black overflow-hidden font-sans border-[8px] border-black">
@@ -61,7 +65,51 @@ export default function Home() {
 
           {/* Canvas 3: Infrastructure (Visible when boundary is set) */}
           {siteBoundary.length > 0 && (
-            <InfrastructureTool onInfrastructureChange={() => {}} />
+            <>
+              <InfrastructureTool
+                onInfrastructureChange={(data: Record<string, unknown>) => {
+                  if (data.type) setActiveRoadType(data.type as RoadType);
+                }}
+              />
+              <RoadBuilder
+                activeRoadType={activeRoadType}
+                onRoadComplete={(road) => setRoads([...roads, road])}
+              />
+
+              {/* Render persistent roads */}
+              <div className="absolute inset-0 pointer-events-none z-10">
+                <svg className="w-full h-full">
+                  {roads.map(road => (
+                    <g key={road.id}>
+                      <polyline
+                        points={road.centerline.map(p => `${p.x},${p.y}`).join(' ')}
+                        fill="none"
+                        stroke="#000"
+                        strokeWidth="12"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <polyline
+                        points={road.centerline.map(p => `${p.x},${p.y}`).join(' ')}
+                        fill="none"
+                        stroke="#fff"
+                        strokeWidth="1"
+                        strokeDasharray="15, 10"
+                      />
+                      {road.assets.map(asset => (
+                        <circle
+                          key={asset.id}
+                          cx={asset.position.x}
+                          cy={asset.position.y}
+                          r={asset.type === 'Light' ? 2 : 4}
+                          fill={asset.type === 'Light' ? '#000' : '#888'}
+                        />
+                      ))}
+                    </g>
+                  ))}
+                </svg>
+              </div>
+            </>
           )}
         </div>
 

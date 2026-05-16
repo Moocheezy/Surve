@@ -17,6 +17,8 @@ export default function InfrastructureTool({ onInfrastructureChange }: Infrastru
     { id: 'setback', icon: Settings2, label: 'Setback Offset' },
   ];
 
+  const roadTypes = ['Highway', 'Arterial', 'Local', 'Specialized'];
+
   return (
     <div className="absolute top-4 right-4 z-30 flex flex-col gap-2">
       <div className="bg-white border-2 border-black p-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
@@ -53,11 +55,20 @@ export default function InfrastructureTool({ onInfrastructureChange }: Infrastru
             </div>
             <div className="space-y-1">
               <label className="text-[8px] font-black uppercase text-zinc-500">Type / Standard</label>
-              <select className="w-full bg-zinc-100 border border-black p-1 text-[8px] font-bold uppercase outline-none">
-                <option>Standard A</option>
-                <option>Premium B</option>
-                <option>Compact C</option>
-              </select>
+              {activeTool === 'road' ? (
+                <select
+                  className="w-full bg-zinc-100 border border-black p-1 text-[8px] font-bold uppercase outline-none"
+                  onChange={(e) => onInfrastructureChange({ type: e.target.value })}
+                >
+                  {roadTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              ) : (
+                <select className="w-full bg-zinc-100 border border-black p-1 text-[8px] font-bold uppercase outline-none">
+                  <option>Standard A</option>
+                  <option>Premium B</option>
+                  <option>Compact C</option>
+                </select>
+              )}
             </div>
           </div>
         </div>
