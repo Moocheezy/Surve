@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import AnalyticsPane from '@/components/AnalyticsPane';
 import MassingCanvas from '@/components/MassingCanvas';
+import Suggestions from '@/components/Suggestions';
 import { SolverParams } from '@/types';
 import { solveSite } from '@/lib/solver';
 
@@ -22,8 +23,8 @@ export default function Home() {
     <main className="flex h-screen w-full bg-slate-950 overflow-hidden font-sans">
       <Sidebar params={params} setParams={setParams} />
 
-      <div className="flex-1 flex flex-col p-4 relative">
-        <header className="flex justify-between items-center mb-4 px-2">
+      <div className="flex-1 flex flex-col p-4 relative overflow-y-auto">
+        <header className="flex justify-between items-center mb-4 px-2 shrink-0">
           <div>
             <h2 className="text-slate-100 font-bold text-lg">{currentScheme.name}</h2>
             <p className="text-slate-500 text-sm">Site Solver / {currentScheme.typology}</p>
@@ -38,23 +39,28 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="flex-1 relative">
-          <MassingCanvas scheme={currentScheme} />
+        <div className="grid grid-cols-12 gap-6 flex-1 min-h-[500px]">
+          <div className="col-span-8 relative">
+            <MassingCanvas scheme={currentScheme} />
 
-          <div className="absolute bottom-6 left-6 flex gap-4 pointer-events-none">
-            <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-3 rounded-lg flex items-center gap-3">
-              <div className="w-3 h-3 bg-blue-500 rounded-full" />
-              <span className="text-xs text-slate-300 font-medium">Building Massing</span>
+            <div className="absolute bottom-6 left-6 flex gap-4 pointer-events-none">
+              <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-3 h-3 bg-blue-500 rounded-full" />
+                <span className="text-xs text-slate-300 font-medium">Building Massing</span>
+              </div>
+              <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-3 h-3 bg-slate-500 rounded-full" />
+                <span className="text-xs text-slate-300 font-medium">Surface Parking</span>
+              </div>
             </div>
-            <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-3 rounded-lg flex items-center gap-3">
-              <div className="w-3 h-3 bg-slate-500 rounded-full" />
-              <span className="text-xs text-slate-300 font-medium">Surface Parking</span>
-            </div>
+          </div>
+
+          <div className="col-span-4 space-y-6 overflow-y-auto pr-2">
+            <AnalyticsPane scheme={currentScheme} />
+            <Suggestions suggestions={currentScheme.suggestions} />
           </div>
         </div>
       </div>
-
-      <AnalyticsPane scheme={currentScheme} />
     </main>
   );
 }

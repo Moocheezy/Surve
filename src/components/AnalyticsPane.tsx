@@ -1,7 +1,7 @@
 'use client';
 
 import { Scheme } from '@/types';
-import { TrendingUp, Users, Car, Square, DollarSign, Percent, LucideIcon } from 'lucide-react';
+import { TrendingUp, Users, Car, Square, DollarSign, Percent, LucideIcon, Maximize, Map as MapIcon } from 'lucide-react';
 
 interface AnalyticsPaneProps {
   scheme: Scheme;
@@ -32,13 +32,13 @@ export default function AnalyticsPane({ scheme }: AnalyticsPaneProps) {
   const { proForma } = scheme;
 
   return (
-    <div className="w-80 bg-slate-900 border-l border-slate-800 p-6 flex flex-col gap-6 h-full overflow-y-auto">
+    <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col gap-6">
       <div className="flex items-center gap-2 text-slate-400 font-medium text-sm uppercase tracking-wider">
         <TrendingUp size={16} />
         <span>Real-time Analytics</span>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <Metric
           icon={Square}
           label="Total NRSF"
@@ -74,14 +74,19 @@ export default function AnalyticsPane({ scheme }: AnalyticsPaneProps) {
           unit="%"
           color="text-purple-400"
         />
-
-        <div className="mt-4 p-4 bg-blue-900/20 border border-blue-500/30 rounded-xl">
-          <h4 className="text-blue-400 text-sm font-bold mb-1">Deal Verdict</h4>
-          <p className="text-slate-400 text-xs leading-relaxed">
-            Based on the current parameters, this {scheme.typology} development is yielding {proForma.yieldOnCost}% on cost.
-            {proForma.yieldOnCost > 6 ? ' This deal pencils well.' : ' Consider increasing density or reducing setbacks.'}
-          </p>
-        </div>
+        <Metric
+          icon={Maximize}
+          label="FAR"
+          value={proForma.far}
+          color="text-blue-300"
+        />
+        <Metric
+          icon={MapIcon}
+          label="Coverage"
+          value={proForma.coverage}
+          unit="%"
+          color="text-slate-300"
+        />
       </div>
     </div>
   );

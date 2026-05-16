@@ -24,6 +24,15 @@ export interface ProForma {
   efficiency: number;
   estimatedCost: number;
   yieldOnCost: number;
+  far: number;
+  coverage: number;
+}
+
+export interface Suggestion {
+  id: string;
+  type: 'success' | 'warning' | 'info';
+  message: string;
+  action?: string;
 }
 
 export interface Scheme {
@@ -33,6 +42,7 @@ export interface Scheme {
   site: Site;
   blocks: BuildingBlock[];
   proForma: ProForma;
+  suggestions: Suggestion[];
   timestamp: number;
 }
 
@@ -42,4 +52,6 @@ export interface SolverParams {
   setback: number;
   typology: Typology;
   targetHeight: number;
+  maxFAR?: number;
+  maxCoverage?: number;
 }

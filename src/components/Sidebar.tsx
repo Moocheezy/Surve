@@ -1,7 +1,8 @@
 'use client';
 
 import { Typology, SolverParams } from '@/types';
-import { Settings, Maximize, Box, Sliders } from 'lucide-react';
+import { Settings, Maximize, Sliders } from 'lucide-react';
+import Image from 'next/image';
 
 interface SidebarProps {
   params: SolverParams;
@@ -13,8 +14,10 @@ export default function Sidebar({ params, setParams }: SidebarProps) {
 
   return (
     <div className="w-80 bg-slate-900 border-r border-slate-800 p-6 flex flex-col gap-8 h-full overflow-y-auto text-slate-200">
-      <div className="flex items-center gap-2">
-        <Box className="text-blue-500 w-8 h-8" />
+      <div className="flex items-center gap-3">
+        <div className="relative w-10 h-10 overflow-hidden rounded-lg bg-slate-800">
+          <Image src="/logo.png" alt="SURVE Logo" fill className="object-cover" />
+        </div>
         <h1 className="text-2xl font-bold tracking-tight">SURVE</h1>
       </div>
 
