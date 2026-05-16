@@ -4,6 +4,15 @@ export type Typology = 'Residential' | 'Industrial' | 'Retail' | 'Mixed-Use';
 
 export type RoadType = 'Highway' | 'Arterial' | 'Local' | 'Specialized';
 
+export type LayerId = 'site' | 'urban' | 'architecture';
+
+export interface LayerState {
+  id: LayerId;
+  name: string;
+  visible: boolean;
+  locked: boolean;
+}
+
 export interface Road {
   id: string;
   type: RoadType;

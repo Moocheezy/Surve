@@ -5,17 +5,36 @@ import MapPortal from '@/components/MapPortal';
 import SiteBoundaryTool from '@/components/SiteBoundaryTool';
 import InfrastructureTool from '@/components/InfrastructureTool';
 import RoadBuilder from '@/components/RoadBuilder';
+import LayerManager from '@/components/LayerManager';
+import PrintStudio from '@/components/PrintStudio';
 import UserMenu from '@/components/UserMenu';
 import Image from 'next/image';
 
 import { Point } from '@/components/SiteBoundaryTool';
-import { Road, RoadType } from '@/types';
+import { Road, RoadType, LayerId, LayerState } from '@/types';
 
 export default function Home() {
   const [isLocked, setIsLocked] = useState(false);
+  const [isPrintMode, setIsPrintMode] = useState(false);
   const [siteBoundary, setSiteBoundary] = useState<Point[]>([]);
   const [roads, setRoads] = useState<Road[]>([]);
   const [activeRoadType, setActiveRoadType] = useState<RoadType>('Local');
+
+  const [layers, setLayers] = useState<LayerState[]>([
+    { id: 'site', name: 'Site Planning', visible: true, locked: false },
+    { id: 'urban', name: 'Urban Planning', visible: true, locked: false },
+    { id: 'architecture', name: 'Architecture', visible: true, locked: false },
+  ]);
+
+  const toggleLayerVisibility = (id: LayerId) => {
+    setLayers(layers.map(l => l.id === id ? { ...l, visible: !l.visible } : l));
+  };
+
+  const toggleLayerLock = (id: LayerId) => {
+    setLayers(layers.map(l => l.id === id ? { ...l, locked: !l.locked } : l));
+  };
+
+  const isLayerVisible = (id: LayerId) => layers.find(l => l.id === id)?.visible ?? true;
 
   return (
     <main className="flex flex-col h-screen w-full bg-white text-black overflow-hidden font-sans border-[8px] border-black">
@@ -30,7 +49,12 @@ export default function Home() {
         <div className="flex items-center gap-6">
           <nav className="flex gap-6">
             <button className="text-[10px] font-black uppercase underline-offset-4 underline decoration-4">Studio</button>
-            <button className="text-[10px] font-black uppercase opacity-30 hover:opacity-100 transition-opacity">Archive</button>
+            <button
+              onClick={() => setIsPrintMode(true)}
+              className="text-[10px] font-black uppercase opacity-30 hover:opacity-100 transition-opacity"
+            >
+              Export
+            </button>
             <button className="text-[10px] font-black uppercase opacity-30 hover:opacity-100 transition-opacity">Insights</button>
           </nav>
           <UserMenu />
@@ -49,22 +73,24 @@ export default function Home() {
 
         {/* Center Canvas Area */}
         <div className="flex-1 relative bg-zinc-50">
-          {/* Canvas 1: Map Portal */}
-          <MapPortal
-            isLocked={isLocked}
-            onLock={() => setIsLocked(true)}
-          />
+          {/* Canvas 1: Map Portal (Site Base) */}
+          <div className={isLayerVisible('site') ? '' : 'hidden'}>
+            <MapPortal
+              isLocked={isLocked}
+              onLock={() => setIsLocked(true)}
+            />
+          </div>
 
-          {/* Canvas 2: Boundary Drawing (Visible when map is locked) */}
-          {isLocked && (
+          {/* Canvas 2: Boundary Drawing (Urban Layer) */}
+          {isLocked && isLayerVisible('urban') && (
             <SiteBoundaryTool
               isLocked={isLocked}
               onBoundaryComplete={(points) => setSiteBoundary(points)}
             />
           )}
 
-          {/* Canvas 3: Infrastructure (Visible when boundary is set) */}
-          {siteBoundary.length > 0 && (
+          {/* Canvas 3: Infrastructure (Urban Layer Assets) */}
+          {siteBoundary.length > 0 && isLayerVisible('urban') && (
             <>
               <InfrastructureTool
                 onInfrastructureChange={(data: Record<string, unknown>) => {
@@ -111,12 +137,28 @@ export default function Home() {
               </div>
             </>
           )}
+
+          {/* Layer Manager */}
+          <LayerManager
+            layers={layers}
+            onToggleVisibility={toggleLayerVisibility}
+            onToggleLock={toggleLayerLock}
+          />
         </div>
 
         {/* Footer / Status Bar */}
         <div className="absolute bottom-4 right-6 z-40 bg-black text-white px-4 py-1 text-[8px] font-black uppercase tracking-[0.2em]">
           V.2.0-STABLE / SYSTEM READY
         </div>
+
+        {/* Print Studio Overlay */}
+        {isPrintMode && (
+          <PrintStudio
+            layers={layers}
+            roads={roads}
+            onClose={() => setIsPrintMode(false)}
+          />
+        )}
       </div>
     </main>
   );
