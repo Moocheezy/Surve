@@ -5,6 +5,8 @@ import MapPortal from '@/components/MapPortal';
 import SiteBoundaryTool from '@/components/SiteBoundaryTool';
 import InfrastructureTool from '@/components/InfrastructureTool';
 import RoadBuilder from '@/components/RoadBuilder';
+import SubdivisionTool from '@/components/SubdivisionTool';
+import SGDiagramView from '@/components/SGDiagramView';
 import LayerManager from '@/components/LayerManager';
 import PrintStudio from '@/components/PrintStudio';
 import UserMenu from '@/components/UserMenu';
@@ -12,11 +14,16 @@ import Image from 'next/image';
 
 import { Point } from '@/components/SiteBoundaryTool';
 import { Road, RoadType, LayerId, LayerState } from '@/types';
+import { Parcel, subdivideSite } from '@/lib/subdivision';
+import { generateSGData, SGData } from '@/lib/sg-diagram';
 
 export default function Home() {
   const [isLocked, setIsLocked] = useState(false);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [siteBoundary, setSiteBoundary] = useState<Point[]>([]);
+  const [parcels, setParcels] = useState<Parcel[]>([]);
+  const [sgData, setSgData] = useState<SGData | null>(null);
+  const [showSGDiagram, setShowSGDiagram] = useState(false);
   const [roads, setRoads] = useState<Road[]>([]);
   const [activeRoadType, setActiveRoadType] = useState<RoadType>('Local');
 
@@ -85,13 +92,32 @@ export default function Home() {
           {isLocked && isLayerVisible('urban') && (
             <SiteBoundaryTool
               isLocked={isLocked}
-              onBoundaryComplete={(points) => setSiteBoundary(points)}
+              onBoundaryComplete={(points) => {
+                setSiteBoundary(points);
+                setSgData(generateSGData(points));
+              }}
             />
           )}
 
           {/* Canvas 3: Infrastructure (Urban Layer Assets) */}
           {siteBoundary.length > 0 && isLayerVisible('urban') && (
             <>
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex gap-4">
+                <SubdivisionTool
+                  parcelCount={parcels.length}
+                  onSubdivide={() => {
+                    const newParcels = subdivideSite(siteBoundary, roads);
+                    setParcels(newParcels);
+                  }}
+                />
+                <button
+                  onClick={() => setShowSGDiagram(true)}
+                  className="bg-white border-2 border-black px-6 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-[10px] font-black uppercase hover:bg-zinc-100"
+                >
+                  View Survey Record
+                </button>
+              </div>
+
               <InfrastructureTool
                 onInfrastructureChange={(data: Record<string, unknown>) => {
                   if (data.type) setActiveRoadType(data.type as RoadType);
@@ -102,9 +128,21 @@ export default function Home() {
                 onRoadComplete={(road) => setRoads([...roads, road])}
               />
 
-              {/* Render persistent roads */}
+              {/* Render persistent assets */}
               <div className="absolute inset-0 pointer-events-none z-10">
                 <svg className="w-full h-full">
+                  {/* Parcels */}
+                  {parcels.map(parcel => (
+                    <polygon
+                      key={parcel.id}
+                      points={parcel.points.map(p => `${p.x},${p.y}`).join(' ')}
+                      fill="rgba(0,0,0,0.05)"
+                      stroke="#000"
+                      strokeWidth="1"
+                      strokeDasharray="4,2"
+                    />
+                  ))}
+                  {/* Roads */}
                   {roads.map(road => (
                     <g key={road.id}>
                       <polyline
@@ -144,6 +182,14 @@ export default function Home() {
             onToggleVisibility={toggleLayerVisibility}
             onToggleLock={toggleLayerLock}
           />
+
+          {/* Modals */}
+          {showSGDiagram && sgData && (
+            <SGDiagramView
+              data={sgData}
+              onClose={() => setShowSGDiagram(false)}
+            />
+          )}
         </div>
 
         {/* Footer / Status Bar */}

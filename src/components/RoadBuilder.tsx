@@ -69,15 +69,23 @@ export default function RoadBuilder({ onRoadComplete, activeRoadType }: RoadBuil
   }, [points, isDrawing]);
 
   useEffect(() => {
-    draw();
+    const handleResize = () => {
+      const canvas = canvasRef.current;
+      if (canvas && canvas.parentElement) {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        draw();
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
   }, [draw]);
 
   return (
     <div className="absolute inset-0 z-20 pointer-events-none">
       <canvas
         ref={canvasRef}
-        width={1000}
-        height={800}
         onClick={handleCanvasClick}
         className={`w-full h-full ${isDrawing ? 'pointer-events-auto cursor-crosshair' : ''}`}
       />
