@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { PenTool, Trash2, FileText, Check } from 'lucide-react';
+import * as turf from '@turf/turf';
 
 export interface Point {
   x: number;
@@ -11,12 +12,17 @@ export interface Point {
 interface SiteBoundaryToolProps {
   onBoundaryComplete: (points: Point[]) => void;
   isLocked: boolean;
+  active: boolean;
 }
 
-export default function SiteBoundaryTool({ onBoundaryComplete }: SiteBoundaryToolProps) {
+export default function SiteBoundaryTool({ onBoundaryComplete, active }: SiteBoundaryToolProps) {
   const [points, setPoints] = useState<Point[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(active);
+
+  useEffect(() => {
+    setIsDrawing(active);
+  }, [active]);
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
@@ -63,6 +69,20 @@ export default function SiteBoundaryTool({ onBoundaryComplete }: SiteBoundaryToo
     }
   }, [points, isDrawing]);
 
+  const analysis = useMemo(() => {
+    if (points.length < 3) return null;
+    const coords = [...points, points[0]].map(p => [p.x, p.y]);
+    const poly = turf.polygon([coords]);
+    const areaSqM = turf.area(poly);
+    const areaSqFt = areaSqM * 10.7639;
+
+    return {
+      areaSqFt: Math.round(areaSqFt),
+      hectares: (areaSqM / 10000).toFixed(2),
+      perimeter: turf.length(poly, { units: 'meters' }).toFixed(2)
+    };
+  }, [points]);
+
   useEffect(() => {
     const handleResize = () => {
       const canvas = canvasRef.current;
@@ -86,14 +106,7 @@ export default function SiteBoundaryTool({ onBoundaryComplete }: SiteBoundaryToo
       />
 
       <div className="absolute bottom-16 left-4 z-30 pointer-events-auto flex flex-col gap-2">
-        {!isDrawing ? (
-          <button
-            onClick={() => setIsDrawing(true)}
-            className="bg-white border-2 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2 text-xs font-bold uppercase"
-          >
-            <PenTool size={16} /> Draw Site Boundary
-          </button>
-        ) : (
+        {isDrawing && (
           <div className="flex gap-2">
             <button
               onClick={() => {
@@ -114,17 +127,17 @@ export default function SiteBoundaryTool({ onBoundaryComplete }: SiteBoundaryToo
         )}
       </div>
 
-      {points.length > 2 && !isDrawing && (
+      {analysis && !isDrawing && (
         <div className="absolute top-24 left-4 z-30 pointer-events-auto bg-white border-2 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-64">
           <div className="flex items-center gap-2 mb-2">
             <FileText size={16} />
             <span className="text-[10px] font-black uppercase">Analysis Report</span>
           </div>
           <div className="space-y-1 text-[9px] font-bold uppercase text-zinc-600">
-            <div className="flex justify-between"><span>Site Area:</span><span>45,200 SQFT</span></div>
-            <div className="flex justify-between"><span>Zoning:</span><span>MU-3 Mixed Use</span></div>
-            <div className="flex justify-between"><span>Max FAR:</span><span>4.5</span></div>
-            <div className="flex justify-between"><span>Setbacks:</span><span>20FT Front / 10FT Side</span></div>
+            <div className="flex justify-between"><span>Site Area:</span><span>{analysis.areaSqFt.toLocaleString()} SQFT</span></div>
+            <div className="flex justify-between"><span>Metric Area:</span><span>{analysis.hectares} Hectares</span></div>
+            <div className="flex justify-between"><span>Perimeter:</span><span>{analysis.perimeter}m</span></div>
+            <div className="flex justify-between border-t border-black/10 pt-1 mt-1"><span>Zoning:</span><span className="text-black">MU-3 Mixed Use</span></div>
           </div>
           <button className="mt-4 w-full py-2 bg-zinc-100 border border-black text-[8px] font-black uppercase hover:bg-black hover:text-white transition-colors">
             Export Full Analysis

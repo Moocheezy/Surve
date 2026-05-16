@@ -4,13 +4,14 @@ import { useState } from 'react';
 import { Truck, Car, Grid3X3, Settings2 } from 'lucide-react';
 
 interface InfrastructureToolProps {
+  activeTool: string | null;
+  setActiveTool: (tool: string | null) => void;
   onInfrastructureChange: (data: Record<string, unknown>) => void;
 }
 
-export default function InfrastructureTool({ onInfrastructureChange }: InfrastructureToolProps) {
-  const [activeTool, setActiveTool] = useState<string | null>(null);
-
+export default function InfrastructureTool({ activeTool, setActiveTool, onInfrastructureChange }: InfrastructureToolProps) {
   const tools = [
+    { id: 'site', icon: Settings2, label: 'Boundary Tool' },
     { id: 'road', icon: Truck, label: 'Road Builder' },
     { id: 'parking', icon: Car, label: 'Parking Area' },
     { id: 'dev', icon: Grid3X3, label: 'Development Area' },
@@ -50,8 +51,18 @@ export default function InfrastructureTool({ onInfrastructureChange }: Infrastru
 
           <div className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[8px] font-black uppercase text-zinc-500">Width / Size</label>
-              <input type="range" className="w-full h-1 bg-zinc-200 appearance-none accent-black cursor-pointer" />
+              <label className="text-[8px] font-black uppercase text-zinc-500">
+                {activeTool === 'setback' ? 'Setback Distance (m)' : 'Width / Size'}
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="50"
+                onChange={(e) => {
+                  if (activeTool === 'setback') onInfrastructureChange({ setback: e.target.value });
+                }}
+                className="w-full h-1 bg-zinc-200 appearance-none accent-black cursor-pointer"
+              />
             </div>
             <div className="space-y-1">
               <label className="text-[8px] font-black uppercase text-zinc-500">Type / Standard</label>

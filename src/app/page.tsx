@@ -5,6 +5,8 @@ import MapPortal from '@/components/MapPortal';
 import SiteBoundaryTool from '@/components/SiteBoundaryTool';
 import InfrastructureTool from '@/components/InfrastructureTool';
 import RoadBuilder from '@/components/RoadBuilder';
+import ParkingTool from '@/components/ParkingTool';
+import SetbackTool from '@/components/SetbackTool';
 import SubdivisionTool from '@/components/SubdivisionTool';
 import SGDiagramView from '@/components/SGDiagramView';
 import LayerManager from '@/components/LayerManager';
@@ -24,8 +26,12 @@ export default function Home() {
   const [parcels, setParcels] = useState<Parcel[]>([]);
   const [sgData, setSgData] = useState<SGData | null>(null);
   const [showSGDiagram, setShowSGDiagram] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
   const [roads, setRoads] = useState<Road[]>([]);
+  const [parkingAreas, setParkingAreas] = useState<any[]>([]);
+  const [setbackDistance, setSetbackDistance] = useState(5);
   const [activeRoadType, setActiveRoadType] = useState<RoadType>('Local');
+  const [activeTool, setActiveTool] = useState<string | null>(null);
 
   const [layers, setLayers] = useState<LayerState[]>([
     { id: 'site', name: 'Site Planning', visible: true, locked: false },
@@ -55,14 +61,24 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-6">
           <nav className="flex gap-6">
-            <button className="text-[10px] font-black uppercase underline-offset-4 underline decoration-4">Studio</button>
+            <button
+              onClick={() => setIsPrintMode(false)}
+              className={`text-[10px] font-black uppercase underline-offset-4 decoration-4 ${!isPrintMode ? 'underline' : 'opacity-30'}`}
+            >
+              Studio
+            </button>
             <button
               onClick={() => setIsPrintMode(true)}
-              className="text-[10px] font-black uppercase opacity-30 hover:opacity-100 transition-opacity"
+              className={`text-[10px] font-black uppercase underline-offset-4 decoration-4 ${isPrintMode ? 'underline' : 'opacity-30'}`}
             >
               Export
             </button>
-            <button className="text-[10px] font-black uppercase opacity-30 hover:opacity-100 transition-opacity">Insights</button>
+            <button
+              onClick={() => setShowInsights(true)}
+              className="text-[10px] font-black uppercase opacity-30 hover:opacity-100 transition-opacity"
+            >
+              Insights
+            </button>
           </nav>
           <UserMenu />
         </div>
@@ -92,6 +108,7 @@ export default function Home() {
           {isLocked && isLayerVisible('urban') && (
             <SiteBoundaryTool
               isLocked={isLocked}
+              active={activeTool === 'site'}
               onBoundaryComplete={(points) => {
                 setSiteBoundary(points);
                 setSgData(generateSGData(points));
@@ -100,32 +117,57 @@ export default function Home() {
           )}
 
           {/* Canvas 3: Infrastructure (Urban Layer Assets) */}
-          {siteBoundary.length > 0 && isLayerVisible('urban') && (
+          {isLocked && isLayerVisible('urban') && (
             <>
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex gap-4">
-                <SubdivisionTool
-                  parcelCount={parcels.length}
-                  onSubdivide={() => {
-                    const newParcels = subdivideSite(siteBoundary, roads);
-                    setParcels(newParcels);
-                  }}
-                />
-                <button
-                  onClick={() => setShowSGDiagram(true)}
-                  className="bg-white border-2 border-black px-6 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-[10px] font-black uppercase hover:bg-zinc-100"
-                >
-                  View Survey Record
-                </button>
-              </div>
+              {siteBoundary.length > 0 && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex gap-4">
+                  <SubdivisionTool
+                    parcelCount={parcels.length}
+                    onSubdivide={() => {
+                      const newParcels = subdivideSite(siteBoundary, roads);
+                      setParcels(newParcels);
+                    }}
+                  />
+                  <button
+                    onClick={() => setShowSGDiagram(true)}
+                    className="bg-white border-2 border-black px-6 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-[10px] font-black uppercase hover:bg-zinc-100"
+                  >
+                    View Survey Record
+                  </button>
+                </div>
+              )}
 
               <InfrastructureTool
+                activeTool={activeTool}
+                setActiveTool={setActiveTool}
                 onInfrastructureChange={(data: Record<string, unknown>) => {
                   if (data.type) setActiveRoadType(data.type as RoadType);
+                  if (data.setback) setSetbackDistance(Number(data.setback));
                 }}
               />
-              <RoadBuilder
-                activeRoadType={activeRoadType}
-                onRoadComplete={(road) => setRoads([...roads, road])}
+
+              {activeTool === 'road' && (
+                <RoadBuilder
+                  activeRoadType={activeRoadType}
+                  onRoadComplete={(road) => {
+                    setRoads([...roads, road]);
+                    setActiveTool(null);
+                  }}
+                />
+              )}
+
+              <ParkingTool
+                active={activeTool === 'parking'}
+                onParkingComplete={(area) => {
+                  setParkingAreas([...parkingAreas, area]);
+                  setActiveTool(null);
+                }}
+              />
+
+              <SetbackTool
+                active={activeTool === 'setback'}
+                siteBoundary={siteBoundary}
+                offsetMeters={setbackDistance}
               />
 
               {/* Render persistent assets */}
@@ -140,6 +182,17 @@ export default function Home() {
                       stroke="#000"
                       strokeWidth="1"
                       strokeDasharray="4,2"
+                    />
+                  ))}
+                  {/* Parking */}
+                  {parkingAreas.map(area => (
+                    <polygon
+                      key={area.id}
+                      points={area.points.map((p: any) => `${p.x},${p.y}`).join(' ')}
+                      fill="rgba(0,0,0,0.1)"
+                      stroke="#000"
+                      strokeWidth="1"
+                      strokeDasharray="2,2"
                     />
                   ))}
                   {/* Roads */}
@@ -189,6 +242,38 @@ export default function Home() {
               data={sgData}
               onClose={() => setShowSGDiagram(false)}
             />
+          )}
+
+          {showInsights && (
+            <div className="fixed inset-0 z-[110] bg-black/80 flex items-center justify-center p-20 backdrop-blur-sm">
+              <div className="bg-white border-[10px] border-black w-full max-w-2xl p-10">
+                <h2 className="text-2xl font-black uppercase mb-6">Development Insights</h2>
+                <div className="grid grid-cols-2 gap-8 font-mono text-sm">
+                  <div className="space-y-2">
+                    <p className="opacity-50 uppercase text-[10px]">Total Yield</p>
+                    <p className="text-xl font-black underline">12,400 SQFT</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="opacity-50 uppercase text-[10px]">Efficiency</p>
+                    <p className="text-xl font-black underline">84%</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="opacity-50 uppercase text-[10px]">Parking Ratio</p>
+                    <p className="text-xl font-black underline">1.2 / Unit</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="opacity-50 uppercase text-[10px]">Estimated Cap Rate</p>
+                    <p className="text-xl font-black underline">5.8%</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowInsights(false)}
+                  className="mt-10 w-full py-4 bg-black text-white font-black uppercase"
+                >
+                  Close Insights
+                </button>
+              </div>
+            </div>
           )}
         </div>
 
